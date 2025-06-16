@@ -1,0 +1,20 @@
+[webservers]
+web-dev-01 ansible_host=192.168.1.10 ansible_user=ubuntu
+web-dev-02 ansible_host=192.168.1.11 ansible_user=ubuntu
+
+[dbservers]
+db-dev-01 ansible_host=192.168.1.20 ansible_user=ubuntu
+
+[dev:children]
+webservers
+dbservers
+
+[dev:vars]
+environment=dev
+nginx_worker_processes=2
+nginx_worker_connections=1024
+database_type=mysql
+database_name=myapp_dev
+database_user=appuser_dev
+mysql_root_password=dev_root_password
+mysql_user_password=dev_user_password

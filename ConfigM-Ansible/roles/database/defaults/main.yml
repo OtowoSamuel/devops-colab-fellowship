@@ -1,0 +1,38 @@
+---
+# Database role defaults
+database_service_name: mysql
+database_type: mysql
+database_port: 3306
+database_config_file: /etc/mysql/mysql.conf.d/mysqld.cnf
+database_data_dir: /var/lib/mysql
+database_log_dir: /var/log/mysql
+
+# Package names (Ubuntu/Debian)
+mysql_packages:
+  - mysql-server
+  - mysql-client
+python_mysql_package: python3-pymysql
+
+# MySQL Configuration
+mysql_bind_address: "0.0.0.0"
+mysql_max_connections: "{{ database_max_connections | default(151) }}"
+mysql_innodb_buffer_pool_size: "{{ database_innodb_buffer_pool_size | default('128M') }}"
+mysql_query_cache_size: 16M
+mysql_tmp_table_size: 32M
+mysql_max_heap_table_size: 32M
+
+# Security
+mysql_allowed_hosts:
+  - "10.0.0.0/8"
+  - "192.168.0.0/16"
+  - "172.16.0.0/12"
+
+# Logging
+mysql_slow_query_log: 1
+mysql_slow_query_log_file: "{{ database_log_dir }}/mysql-slow.log"
+mysql_long_query_time: 2
+
+# Backup settings
+mysql_backup_dir: /var/backups/mysql
+backup_retention_days: 7
+backup_schedule: "0 2 * * *"

@@ -1,0 +1,57 @@
+server {
+    listen {{ listen_port }} default_server;
+    listen [::]:{{ listen_port }} default_server;
+
+    server_name {{ server_name }} _;
+    root {{ nginx_web_root }};
+    index index.html index.htm index.nginx-debian.html;
+
+    # Security
+    server_tokens off;
+
+    # Logging
+    access_log {{ nginx_access_log }};
+    error_log {{ nginx_error_log }};
+
+    # Main location
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    # PHP processing (if needed)
+    location ~ \.php$ {
+        return 404;
+    }
+
+    # Deny access to hidden files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Favicon and robots.txt
+    location = /favicon.ico {
+        log_not_found off;
+        access_log off;
+    }
+
+    location = /robots.txt {
+        log_not_found off;
+        access_log off;
+        allow all;
+    }
+
+    # Static assets caching
+    location ~* \.(css|gif|ico|jpeg|jpg|js|png)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+}

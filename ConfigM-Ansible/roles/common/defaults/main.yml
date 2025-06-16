@@ -1,0 +1,27 @@
+---
+# Common role defaults
+app_name: myapp
+app_user: appuser
+app_dir: /opt/myapp
+timezone: UTC
+
+# Common packages for all servers
+common_packages:
+  - curl
+  - wget
+  - vim
+  - htop
+  - unzip
+  - git
+  - rsync
+
+# Firewall configuration
+firewall_enabled: true
+firewall_rules:
+  - { rule: allow, port: 22, proto: tcp }  # SSH
+  - { rule: allow, port: 80, proto: tcp }  # HTTP
+  - { rule: allow, port: 443, proto: tcp } # HTTPS
+
+# Logging configuration
+log_rotation_enabled: true
+log_retention_days: 30

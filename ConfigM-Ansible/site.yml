@@ -1,0 +1,41 @@
+---
+- name: Deploy Web Server and Database Infrastructure
+  hosts: all
+  become: yes
+  gather_facts: yes
+  
+  pre_tasks:
+    - name: Update package cache
+      package:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+    
+    - name: Update package cache (RHEL/CentOS)
+      yum:
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+  roles:
+    - common
+    - nginx
+    - database
+
+  post_tasks:
+    - name: Verify services are running
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - nginx
+        - "{{ database_service_name | default('mysql') }}"
+      ignore_errors: yes
+
+    - name: Display deployment summary
+      debug:
+        msg: |
+          Deployment completed successfully!
+          Environment: {{ environment | default('unknown') }}
+          Web server: Nginx
+          Database: {{ database_type | default('MySQL') }}
+          Application ready at: http://{{ ansible_default_ipv4.address }}

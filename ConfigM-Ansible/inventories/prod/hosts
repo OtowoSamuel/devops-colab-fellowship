@@ -1,0 +1,22 @@
+[webservers]
+web-prod-01 ansible_host=10.0.1.10 ansible_user=ubuntu
+web-prod-02 ansible_host=10.0.1.11 ansible_user=ubuntu
+web-prod-03 ansible_host=10.0.1.12 ansible_user=ubuntu
+
+[dbservers]
+db-prod-01 ansible_host=10.0.1.20 ansible_user=ubuntu
+db-prod-02 ansible_host=10.0.1.21 ansible_user=ubuntu
+
+[prod:children]
+webservers
+dbservers
+
+[prod:vars]
+environment=prod
+nginx_worker_processes=4
+nginx_worker_connections=2048
+database_type=mysql
+database_name=myapp_prod
+database_user=appuser_prod
+mysql_root_password=prod_root_password
+mysql_user_password=prod_user_password

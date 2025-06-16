@@ -1,0 +1,23 @@
+---
+# Production Environment Variables
+environment: prod
+log_level: warn
+
+# Security settings for prod
+firewall_enabled: true
+ssl_enabled: true
+ssl_cert_path: /etc/ssl/certs/myapp.crt
+ssl_key_path: /etc/ssl/private/myapp.key
+
+# Performance settings for prod
+nginx_keepalive_timeout: 65
+nginx_client_max_body_size: 50m
+
+# Database settings for prod
+database_max_connections: 200
+database_innodb_buffer_pool_size: 1G
+
+# Backup settings for prod
+backup_enabled: true
+backup_retention_days: 30
+backup_schedule: "0 2 * * *"

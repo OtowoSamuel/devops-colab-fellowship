@@ -1,0 +1,135 @@
+---
+# Database role tasks
+- name: Install MySQL server and client
+  package:
+    name: "{{ mysql_packages }}"
+    state: present
+  tags: mysql
+
+- name: Install Python MySQL library
+  package:
+    name: "{{ python_mysql_package }}"
+    state: present
+  tags: mysql
+
+- name: Start and enable MySQL service
+  systemd:
+    name: "{{ database_service_name }}"
+    state: started
+    enabled: yes
+  tags: mysql
+
+- name: Check if MySQL root password is set
+  command: mysql -u root -e "SELECT 1"
+  register: mysql_root_check
+  failed_when: false
+  changed_when: false
+  tags: mysql
+
+- name: Set MySQL root password
+  mysql_user:
+    name: root
+    password: "{{ mysql_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    state: present
+  when: mysql_root_check.rc == 0
+  tags: mysql
+
+- name: Create MySQL configuration file
+  template:
+    src: my.cnf.j2
+    dest: "{{ database_config_file }}"
+    backup: yes
+  notify: restart mysql
+  tags: mysql
+
+- name: Create application database
+  mysql_db:
+    name: "{{ database_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  tags: mysql
+
+- name: Create application database user
+  mysql_user:
+    name: "{{ database_user }}"
+    password: "{{ mysql_user_password }}"
+    priv: "{{ database_name }}.*:ALL"
+    host: "%"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  tags: mysql
+
+- name: Remove anonymous MySQL users
+  mysql_user:
+    name: ""
+    host_all: yes
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  tags: mysql
+
+- name: Remove MySQL test database
+  mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  tags: mysql
+
+- name: Configure MySQL firewall rules
+  ufw:
+    rule: allow
+    port: "{{ database_port }}"
+    proto: tcp
+    src: "{{ item }}"
+  loop: "{{ mysql_allowed_hosts }}"
+  when: 
+    - ansible_os_family == "Debian"
+    - firewall_enabled | default(true)
+  tags: [mysql, firewall]
+
+- name: Create database backup directory
+  file:
+    path: "{{ mysql_backup_dir }}"
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: '0750'
+  when: backup_enabled | default(false)
+  tags: [mysql, backup]
+
+- name: Create database backup script
+  template:
+    src: mysql-backup.sh.j2
+    dest: /usr/local/bin/mysql-backup.sh
+    mode: '0755'
+  when: backup_enabled | default(false)
+  tags: [mysql, backup]
+
+- name: Schedule database backups
+  cron:
+    name: "MySQL Database Backup"
+    cron_file: mysql-backup
+    user: root
+    job: "/usr/local/bin/mysql-backup.sh"
+    minute: "{{ backup_schedule.split(' ')[0] }}"
+    hour: "{{ backup_schedule.split(' ')[1] }}"
+    day: "{{ backup_schedule.split(' ')[2] }}"
+    month: "{{ backup_schedule.split(' ')[3] }}"
+    weekday: "{{ backup_schedule.split(' ')[4] }}"
+  when: backup_enabled | default(false)
+  tags: [mysql, backup]
+
+- name: Check MySQL service status
+  systemd:
+    name: "{{ database_service_name }}"
+  register: mysql_service_status
+  tags: mysql
+
+- name: Display MySQL status
+  debug:
+    msg: "MySQL service is {{ mysql_service_status.status.ActiveState }}"
+  tags: mysql

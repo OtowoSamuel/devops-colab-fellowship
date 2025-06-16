@@ -1,0 +1,7 @@
+---
+# Database Server Group Variables
+database_service_name: mysql
+database_port: 3306
+database_config_file: /etc/mysql/mysql.conf.d/mysqld.cnf
+database_data_dir: /var/lib/mysql
+database_log_dir: /var/log/mysql

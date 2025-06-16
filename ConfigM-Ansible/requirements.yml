@@ -1,0 +1,19 @@
+---
+# Ansible Galaxy requirements file
+# Install with: ansible-galaxy install -r requirements.yml
+
+collections:
+  - name: community.general
+    version: ">=3.0.0"
+  - name: community.mysql
+    version: ">=2.0.0"
+  - name: ansible.posix
+    version: ">=1.0.0"
+
+# Optional: External roles from Ansible Galaxy
+roles:
+  # Uncomment if you want to use external roles
+  # - name: geerlingguy.nginx
+  #   version: "3.1.4"
+  # - name: geerlingguy.mysql
+  #   version: "4.3.4"

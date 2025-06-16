@@ -1,0 +1,64 @@
+user {{ nginx_user }};
+worker_processes {{ nginx_worker_processes }};
+pid {{ nginx_pid_file }};
+
+events {
+    worker_connections {{ nginx_worker_connections }};
+    use epoll;
+    multi_accept on;
+}
+
+http {
+    ##
+    # Basic Settings
+    ##
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout {{ nginx_keepalive_timeout }};
+    types_hash_max_size 2048;
+    server_names_hash_bucket_size {{ nginx_server_names_hash_bucket_size }};
+    client_max_body_size {{ nginx_client_max_body_size }};
+
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    ##
+    # Logging Settings
+    ##
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log {{ nginx_access_log }} main;
+    error_log {{ nginx_error_log }};
+
+    ##
+    # Gzip Settings
+    ##
+    {% if gzip_enabled %}
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types
+        {{ gzip_types | join('\n        ') }};
+    {% endif %}
+
+    ##
+    # Security Headers
+    ##
+    {% if security_headers_enabled %}
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+    {% endif %}
+
+    ##
+    # Virtual Host Configs
+    ##
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}

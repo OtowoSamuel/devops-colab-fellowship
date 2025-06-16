@@ -1,0 +1,13 @@
+# Log rotation configuration for {{ app_name }}
+{{ app_dir }}/logs/*.log {
+    daily
+    missingok
+    rotate {{ log_retention_days }}
+    compress
+    delaycompress
+    notifempty
+    create 0644 {{ app_user }} {{ app_user }}
+    postrotate
+        systemctl reload nginx > /dev/null 2>&1 || true
+    endscript
+}

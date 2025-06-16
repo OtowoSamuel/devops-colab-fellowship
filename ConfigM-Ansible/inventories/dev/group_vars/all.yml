@@ -1,0 +1,12 @@
+---
+# Additional environment-based host variables can be placed here
+# These variables will be applied to all hosts in the development environment
+
+# Example host-specific overrides:
+# web-dev-01:
+#   nginx_worker_processes: 1
+#   nginx_worker_connections: 512
+#
+# db-dev-01:
+#   mysql_max_connections: 25
+#   mysql_innodb_buffer_pool_size: 64M

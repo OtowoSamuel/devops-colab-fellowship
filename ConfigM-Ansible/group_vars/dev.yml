@@ -1,0 +1,20 @@
+---
+# Development Environment Variables
+environment: dev
+log_level: debug
+
+# Security settings for dev
+firewall_enabled: false
+ssl_enabled: false
+
+# Performance settings for dev
+nginx_keepalive_timeout: 30
+nginx_client_max_body_size: 10m
+
+# Database settings for dev
+database_max_connections: 50
+database_innodb_buffer_pool_size: 128M
+
+# Backup settings for dev
+backup_enabled: false
+backup_retention_days: 7

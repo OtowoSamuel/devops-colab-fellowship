@@ -1,0 +1,22 @@
+---
+- name: Deploy Web Servers Only
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+  
+  pre_tasks:
+    - name: Update package cache
+      package:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+  roles:
+    - common
+    - nginx
+
+  post_tasks:
+    - name: Verify Nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: yes
